@@ -1,0 +1,118 @@
+{% extends 'base.html' %}
+{% load humanize %}
+{% load custom_filters %}
+{% load static %}
+
+{% block title %}صفحه اصلی | دارا{% endblock %}
+
+{% block content %}
+<header class="middle">
+    <div class="box-long">
+        <div class="welcome-text">
+            <span class="welcome-title">
+                {% if user.is_authenticated %}
+                    سلام {{ user.first_name|default:user.username }}، خوش آمدید
+                {% else %}
+                    سلام، خوش آمدید
+                {% endif %}
+            </span>
+            <span class="welcome-subtitle">آماده‌اید وضعیت مالی خود را بررسی کنید؟</span>
+        </div>
+        <div class="site-info">
+            <p>
+                دارا یک سیستم مدیریت مالی است که به شما کمک می‌کند
+                درآمدها، هزینه‌ها، فاکتورها، حقوق و دستمزد،
+                سرمایه‌گذاری‌ها و گزارش‌های مالی خود را ساده‌تر مدیریت کنید.
+            </p>
+        </div>
+    </div>
+</header>
+
+<main>
+    <div class="t-box" id="services">
+        <h1>مدیریت مالی</h1>
+        <div class="box-row">
+            <a href="{% url 'expenses' %}" class="mini-box expense-card">
+                <span class="imogi">💸</span>
+                <div class="padding-minibox">
+                    <h2>هزینه‌ها</h2>
+                    <span>مدیریت و کنترل هزینه‌های مالی</span>
+                </div>
+                <span class="card-arrow">←</span>
+            </a>
+
+            <a href="{% url 'invoices' %}" class="mini-box invoice-card">
+                <span class="imogi">🧾</span>
+                <div class="padding-minibox">
+                    <h2>فاکتورها</h2>
+                    <span>صدور و مدیریت فاکتورها</span>
+                </div>
+                <span class="card-arrow">←</span>
+            </a>
+
+            <a href="{% url 'investments' %}" class="mini-box investment-card">
+                <span class="imogi">📈</span>
+                <div class="padding-minibox">
+                    <h2>سرمایه‌گذاری</h2>
+                    <span>مدیریت و پیگیری سرمایه‌گذاری‌ها</span>
+                </div>
+                <span class="card-arrow">←</span>
+            </a>
+
+            <a href="{% url 'payrolls' %}" class="mini-box payroll-card">
+                <span class="imogi">👥</span>
+                <div class="padding-minibox">
+                    <h2>حقوق و دستمزد</h2>
+                    <span>مدیریت حقوق و پرداخت کارکنان</span>
+                </div>
+                <span class="card-arrow">←</span>
+            </a>
+        </div>
+    </div>
+
+    <section class="feature-section">
+        <div class="wave-arrow">
+            <svg viewBox="0 0 260 150" xmlns="http://www.w3.org/2000/svg">
+                <path d="M10 25 C70 15, 85 30, 115 55 C135 72, 155 75, 170 82 C190 92, 190 115, 190 135" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" />
+                <path d="M180 125 L190 140 L202 126" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" />
+            </svg>
+            <span class="wave-text">یه قدم برای مدیریت بهتر مالی</span>
+        </div>
+
+        <div class="feature-content">
+            <div class="feature-main">
+                <span class="feature-label">مدیریت مالی هوشمند</span>
+                <h2>مدیریت مالی، ساده‌تر از همیشه</h2>
+                <p>درآمد، هزینه‌ها و فعالیت‌های مالی خود را در یک محیط ساده و یکپارچه مدیریت کنید.</p>
+                
+                <a href="{% url 'dashboard' %}" class="feature-btn">
+                    شروع کنید <span>←</span>
+                </a>
+            </div>
+
+            <div class="special-offer">
+                <span class="offer-label">پیشنهاد ویژه دارا</span>
+                <h3>شروع رایگان</h3>
+                <p>بدون پیچیدگی، مدیریت مالی خود را شروع کنید.</p>
+                <a href="#services" class="offer-btn">آشنایی با امکانات</a>
+            </div>
+        </div>
+    </section>
+</main>
+
+
+<div class="name-modal" id="nameModal">
+    <div class="name-modal-box">
+        <button class="modal-close" id="modalClose">×</button>
+        <h2>ورود به دارا</h2>
+        <p>برای شروع، نام و نام خانوادگی خود را وارد کنید.</p>
+        <input type="text" id="fullName" placeholder="نام و نام خانوادگی">
+        <span class="name-error" id="nameError"></span>
+        <button class="modal-submit" id="submitName">ورود به سیستم</button>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+    <script src="{% static 'js/index.js' %}"></script>
+{% endblock %}

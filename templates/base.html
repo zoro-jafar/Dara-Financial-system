@@ -1,0 +1,55 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}سیستم مدیریت مالی دارا{% endblock %}</title>
+    
+    
+    <link rel="stylesheet" href="{% static 'css/d_style.css' %}">
+    
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+
+    <nav>
+    <div class="nav-logo">
+        <img src="{% static 'assets/Logo.png' %}" alt="لوگو دارا">
+    </div>
+
+    <span class="space">
+        <a href="{% url 'index' %}" class="links {% if request.resolver_match.url_name == 'index' %}active-link{% endif %}">صفحه اصلی</a>
+        <a href="{% url 'dashboard' %}" class="links {% if request.resolver_match.url_name == 'dashboard' %}active-link{% endif %}">داشبورد</a>
+        <a href="{% url 'expenses' %}" class="links {% if request.resolver_match.url_name == 'expenses' %}active-link{% endif %}">هزینه‌ها</a>
+        <a href="{% url 'invoices' %}" class="links {% if request.resolver_match.url_name == 'invoices' %}active-link{% endif %}">فاکتورها</a>
+        <a href="{% url 'investments' %}" class="links {% if request.resolver_match.url_name == 'investments' %}active-link{% endif %}">سرمایه‌گذاری</a>
+        <a href="{% url 'payrolls' %}" class="links {% if request.resolver_match.url_name == 'payrolls' %}active-link{% endif %}">حقوق و دستمزد</a>
+        <a href="{% url 'reports' %}" class="links {% if request.resolver_match.url_name == 'reports' %}active-link{% endif %}">گزارش‌ها</a>
+        </span>
+
+        <!-- 👈 این بخش برای دکمه خروج و منوی موبایل -->
+        <div style="display: flex; align-items: center; gap: 15px;">
+            {% if user.is_authenticated %}
+                <form action="{% url 'logout' %}" method="POST" style="display: inline;">
+                    {% csrf_token %}
+                    <button type="submit" style="background: none; border: none; color: #FF6B6B; font-family: 'vazir'; cursor: pointer; font-size: 13px;">خروج</button>
+                </form>            
+            {% endif %}
+            <button class="menu-toggle" id="menuToggle">☰</button>
+        </div>
+    </nav>
+    
+    {% block content %}
+    {% endblock %}
+
+    <footer class="site-footer">
+        <div class="footer-bottom">
+            <span>© ۱۴۰۵ دارا</span>
+            <span>Version 1.0</span>
+        </div>
+    </footer>
+
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

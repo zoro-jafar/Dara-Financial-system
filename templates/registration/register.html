@@ -1,0 +1,47 @@
+{% extends 'base.html' %}
+
+{% block title %}ثبت‌نام | دارا{% endblock %}
+
+{% block content %}
+<div style="display: flex; justify-content: center; align-items: center; min-height: 75vh; padding: 20px;">
+    <div style="width: 100%; max-width: 450px; background: var(--color-surface); padding: 40px; border-radius: 20px; border: 1px solid rgba(255,255,255,0.08); box-shadow: 0 10px 30px rgba(0,0,0,0.3);">
+        
+        <h2 style="color: var(--color-primary); text-align: center; margin-bottom: 25px; font-size: 24px;">ثبت‌نام در دارا</h2>
+        
+        <!-- نمایش خطاها در صورت وجود -->
+        {% if form.errors %}
+            <div style="background: rgba(255, 107, 107, 0.1); color: #FF6B6B; padding: 10px; border-radius: 8px; text-align: center; font-size: 13px; margin-bottom: 20px;">
+                لطفاً خطاهای فرم را برطرف کنید.
+            </div>
+        {% endif %}
+
+        <form method="POST">
+            {% csrf_token %}
+            
+            <!-- ۱. نام کاربری -->
+            <label style="color: var(--color-text); display: block; margin-bottom: 8px; font-size: 13px;">نام کاربری</label>
+            <input type="text" name="username" style="width: 100%; padding: 12px; margin-bottom: 15px; border-radius: 10px; border: 1px solid rgba(255,255,255,0.1); background: var(--color-bg); color: white; font-family: 'vazir'; outline: none;" required>
+
+            <!-- ۲. شماره تلفن -->
+            <label style="color: var(--color-text); display: block; margin-bottom: 8px; font-size: 13px;">شماره تلفن (اختیاری)</label>
+            <input type="text" name="phone" style="width: 100%; padding: 12px; margin-bottom: 15px; border-radius: 10px; border: 1px solid rgba(255,255,255,0.1); background: var(--color-bg); color: white; font-family: 'vazir'; outline: none;">
+
+            <!-- ۳. رمز عبور (اسم فیلد باید password1 باشه) -->
+            <label style="color: var(--color-text); display: block; margin-bottom: 8px; font-size: 13px;">رمز عبور</label>
+            <input type="password" name="password1" style="width: 100%; padding: 12px; margin-bottom: 15px; border-radius: 10px; border: 1px solid rgba(255,255,255,0.1); background: var(--color-bg); color: white; font-family: 'vazir'; outline: none;" required>
+
+            <!-- ۴. تکرار رمز عبور (اسم فیلد باید password2 باشه) -->
+            <label style="color: var(--color-text); display: block; margin-bottom: 8px; font-size: 13px;">تکرار رمز عبور</label>
+            <input type="password" name="password2" style="width: 100%; padding: 12px; margin-bottom: 25px; border-radius: 10px; border: 1px solid rgba(255,255,255,0.1); background: var(--color-bg); color: white; font-family: 'vazir'; outline: none;" required>
+
+            <button type="submit" style="width: 100%; padding: 14px; background: var(--color-primary); color: #1A1C1F; border: none; border-radius: 10px; font-family: 'vazir'; font-weight: bold; font-size: 16px; cursor: pointer; transition: 0.3s;">ثبت‌نام و ورود</button>
+        </form>
+
+        <div style="text-align: center; margin-top: 20px; font-size: 13px;">
+            <span style="color: var(--color-text-muted);">قبلاً ثبت‌نام کرده‌اید؟</span>
+            <a href="{% url 'login' %}" style="color: var(--color-secondary); text-decoration: none;">وارد شوید</a>
+        </div>
+
+    </div>
+</div>
+{% endblock %}

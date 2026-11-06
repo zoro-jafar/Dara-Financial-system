@@ -1,0 +1,495 @@
+{% extends 'base.html' %}
+{% load humanize %}
+{% load custom_filters %}
+{% load static %}
+
+    {% block title %}گزارش‌ها | دارا{% endblock %}
+
+{% block extra_css %}
+   
+{% endblock %}
+
+
+{% block content %}
+    <!-- =============================
+            Reports Content
+    ============================== -->
+
+    <main class="reports-page">
+
+
+        <!-- Header -->
+
+        <section class="page-header">
+
+            <div>
+
+                <span class="page-label">
+                    تحلیل مالی
+                </span>
+
+                <h1>
+                    گزارش‌های مالی
+                </h1>
+
+                <p>
+                    وضعیت مالی مجموعه را بررسی و تحلیل کنید.
+                </p>
+
+            </div>
+
+
+            <button class="report-export-btn" id="exportReport">
+                دریافت گزارش
+            </button>
+
+        </section>
+
+
+        <!-- =============================
+                Summary Cards
+        ============================== -->
+
+        <section class="report-summary-grid">
+
+
+            <div class="report-summary-card">
+
+                <span class="report-card-icon">
+                    ↙
+                </span>
+
+                <div>
+
+                    <span>
+                        جمع بدهکار
+                    </span>
+
+                    <strong>
+                        {{ total_debit|intcomma|to_persian }}
+                    </strong>
+
+                    <small>
+                        تومان
+                    </small>
+
+                </div>
+
+            </div>
+
+
+            <div class="report-summary-card">
+
+                <span class="report-card-icon">
+                    ↗
+                </span>
+
+                <div>
+
+                    <span>
+                        جمع بستانکار
+                    </span>
+
+                    <strong>
+                        {{ total_credit|intcomma|to_persian }}
+                    </strong>
+
+                    <small>
+                        تومان
+                    </small>
+
+                </div>
+
+            </div>
+
+
+            <div class="report-summary-card">
+
+                <span class="report-card-icon">
+                    سود
+                </span>
+
+                <div>
+
+                    <span>
+                        سود خالص
+                    </span>
+
+                    <strong class="report-profit">
+                        {{ net_profit|intcomma|to_persian }}
+                    </strong>
+
+                    <small>
+                        تومان
+                    </small>
+
+                </div>
+
+            </div>
+
+
+            <div class="report-summary-card">
+
+                <span class="report-card-icon">
+                    #
+                </span>
+
+                <div>
+
+                    <span>
+                        تراکنش‌ها
+                    </span>
+
+                    <strong>
+                        {{ debit.count| add:credits.count|to_persian }}
+                    </strong>
+
+                    <small>
+                        تراکنش
+                    </small>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- =============================
+                Report Filters
+        ============================== -->
+
+        <form method="GET" action="{% url 'reports' %}" class="report-filter-box">
+
+            <div class="report-filter-item">
+                <label>از تاریخ</label>
+                <input type="text" name="start_date" value="{{ start_date }}" placeholder="۱۴۰۵/۰۵/۰۱">
+            </div>
+
+            <div class="report-filter-item">
+                <label>تا تاریخ</label>
+                <input type="text" name="end_date" value="{{ end_date }}" placeholder="۱۴۰۵/۰۵/۳۱">
+            </div>
+
+            <div class="report-filter-item">
+                <label>نوع گزارش</label>
+                <select id="reportType" name="report_type">
+                    <option value="trial" {% if report_type == 'trial' %}selected{% endif %}>تراز آزمایشی</option>
+                    <option value="profit" {% if report_type == 'profit' %}selected{% endif %}>سود و زیان</option>
+                    <option value="income" {% if report_type == 'income' %}selected{% endif %}>درآمد و هزینه</option>
+                    <option value="account" {% if report_type == 'account' %}selected{% endif %}>گردش حساب</option>
+                </select>
+            </div>
+
+            <button type="submit" class="show-report-btn" id="showReport">
+                نمایش گزارش
+            </button>
+
+        </form>
+
+        <!-- =============================
+                Trial Balance
+        ============================== -->
+    {% if report_type == 'trial' %}    
+        <section class="trial-balance-card">
+
+            <div class="report-section-header">
+
+                <div>
+
+                    <span>
+                        گزارش حسابداری
+                    </span>
+
+                    <h2>
+                        تراز آزمایشی
+                    </h2>
+
+                </div>
+
+
+                <span class="balance-date">
+                    مرداد ۱۴۰۵
+                </span>
+
+            </div>
+
+
+            <div class="trial-table-wrapper">
+
+                <table class="trial-table">
+
+                    <thead>
+
+                        <tr>
+
+                            <th>
+                                حساب
+                            </th>
+
+                            <th>
+                                بدهکار
+                            </th>
+
+                            <th>
+                                بستانکار
+                            </th>
+
+                        </tr>
+
+                    </thead>
+
+
+                    <tbody>
+                        {% for debit in debits %}
+                        <tr>
+                            <td>{{ debit.account_name }}</td>
+                            <td>{{ debit.amount|intcomma|to_persian }}</td>
+                            <td>—</td>
+                        </tr>
+                        {% endfor %}
+
+                        {% for credit in credits %}
+                        <tr>
+                            <td>{{ credit.account_name }}</td>
+                            <td>—</td>
+                            <td>{{ credit.amount|intcomma|to_persian }}</td>
+                        </tr>
+                        {% endfor %}
+                        
+                        {% if not debits and not credits %}
+                        <tr>
+                            <td colspan="3" style="text-align: center;">هیچ تراکنشی در این بازه زمانی یافت نشد.</td>
+                        </tr>
+                        {% endif %}
+                    </tbody>
+
+
+                    <tfoot>
+
+                        <tr>
+
+                            <th>
+                                جمع کل
+                            </th>
+
+                            <th>
+                                {{ total_debit|intcomma|to_persian }}
+                            </th>
+
+                            <th>
+                                {{ total_credit|intcomma|to_persian }}
+                            </th>
+
+                        </tr>
+
+                    </tfoot>
+
+                </table>
+
+            </div>
+
+
+            <div class="balance-status">
+
+                <span class="status-check">
+                    ✓
+                </span>
+
+                <div>
+
+                    <strong>
+                        تراز است
+                    </strong>
+
+                    <p>
+                        جمع بدهکار و بستانکار برابر است.
+                    </p>
+
+                </div>
+
+            </div>
+
+        </section>
+    {% endif %}
+
+    {% if report_type == 'profit' or report_type == 'income' %}
+        <section class="trial-balance-card" style="margin-top: 20px;">
+            <div class="report-section-header">
+                <div>
+                    <span>گزارش حسابداری</span>
+                    <h2>
+                        {% if report_type == 'profit' %}صورت سود و زیان{% else %}درآمد و هزینه{% endif %}
+                    </h2>
+                </div>
+            </div>
+            
+            <div class="trial-table-wrapper">
+                <table class="trial-table">
+                    <thead>
+                        <tr>
+                            <th>عنوان</th>
+                            <th>مبلغ (تومان)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>مجموع درآمدها</td>
+                            <td class="profit-text">{{ total_income|intcomma|to_persian }}</td>
+                        </tr>
+                        <tr>
+                            <td>مجموع هزینه‌ها</td>
+                            <td class="loss-text">{{ total_expense|intcomma|to_persian }}</td>
+                        </tr>
+                        <tr style="background: rgba(255,255,255,0.05);">
+                            <td><strong>سود / زیان خالص</strong></td>
+                            <td><strong class="{% if net_profit >= 0 %}profit-text{% else %}loss-text{% endif %}">{{ net_profit|intcomma|to_persian }}</strong></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+    {% endif %}
+
+    {% if report_type == 'account' %}
+        <section class="trial-balance-card" style="margin-top: 20px;">
+            <div class="report-section-header">
+                <div>
+                    <span>گزارش حسابداری</span>
+                    <h2>گردش حساب (دفتر کل)</h2>
+                </div>
+            </div>
+            
+            <div class="trial-table-wrapper">
+                <table class="trial-table">
+                    <thead>
+                        <tr>
+                            <th>حساب</th>
+                            <th>شرح</th>
+                            <th>تاریخ</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for t in debits %}
+                        <tr>
+                            <td>{{ t.account_name }}</td>
+                            <td>{{ t.description|default:"-" }}</td>
+                            <td>بدهکار</td>
+                        </tr>
+                        {% endfor %}
+                        {% for t in credits %}
+                        <tr>
+                            <td>{{ t.account_name }}</td>
+                            <td>{{ t.description|default:"-" }}</td>
+                            <td>بستانکار</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </section>
+    {% endif %}
+        <!-- =============================
+                Financial Analysis
+        ============================== -->
+
+        <section class="financial-analysis">
+
+
+            <div class="analysis-info">
+
+                <span class="analysis-label">
+                    تحلیل مالی
+                </span>
+
+                <h2>
+                    وضعیت درآمد و هزینه
+                </h2>
+
+                <p>
+                    مقایسه درآمد و هزینه به شما کمک می‌کند
+                    وضعیت عملکرد مالی مجموعه را بهتر بررسی کنید.
+                </p>
+
+
+                <div class="analysis-values">
+
+                    <div>
+
+                        <span>
+                            درآمد
+                        </span>
+
+                        <strong>
+                            {{ total_income }}
+                        </strong>
+
+                    </div>
+
+
+                    <div>
+
+                        <span>
+                            هزینه
+                        </span>
+
+                        <strong>
+                            {{ total_expense }}
+                        </strong>
+
+                    </div>
+
+
+                    <div>
+
+                        <span>
+                            سود خالص
+                        </span>
+
+                        <strong class="analysis-profit">
+                            {{ net_profit }}
+                        </strong>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <div class="analysis-chart">
+                <div class="chart-row">
+                    <span>درآمد</span>
+                    <div class="chart-track">
+                        <div class="chart-income" style="width: {{ income_percent }}%;"></div>
+                    </div>
+                    <strong>{{ total_income|floatformat:"0" }}</strong>
+                </div>
+                <div class="chart-row">
+                    <span>هزینه</span>
+                    <div class="chart-track">
+                        <div class="chart-expense" style="width: {{ expense_percent }}%;"></div>
+                    </div>
+                    <strong>{{ total_expense|floatformat:"0" }}</strong>
+                </div>
+                <div class="chart-row">
+                    <span>سود</span>
+                    <div class="chart-track">
+                        <div class="chart-profit" style="width: {{ profit_percent }}%;"></div>
+                    </div>
+                    <strong>{{ net_profit|floatformat:"0" }}</strong>
+                </div>
+            </div>
+
+        </section>
+
+
+    </main>
+
+
+{% endblock %}
+
+{% block extra_js %}    
+    <script src="js/reports.js"></script>
+{% endblock %}
+

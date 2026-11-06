@@ -1,0 +1,37 @@
+{% extends 'base.html' %}
+
+{% block title %}ورود | دارا{% endblock %}
+
+{% block content %}
+<div style="display: flex; justify-content: center; align-items: center; min-height: 70vh; padding: 20px;">
+    <div style="width: 100%; max-width: 400px; background: var(--color-surface); padding: 40px; border-radius: 20px; border: 1px solid rgba(255,255,255,0.08);">
+        
+        <h2 style="color: var(--color-primary); text-align: center; margin-bottom: 25px; font-size: 24px;">ورود به دارا</h2>
+        
+        <!-- 👈 این بخش نمایش خطا -->
+        {% if form.errors %}
+            <div style="background: rgba(255, 107, 107, 0.1); border: 1px solid rgba(255, 107, 107, 0.3); color: #FF6B6B; padding: 12px; border-radius: 10px; font-size: 13px; margin-bottom: 20px; text-align: center;">
+                نام کاربری یا رمز عبور اشتباه است.
+            </div>
+        {% endif %}
+
+        <form method="POST">
+            {% csrf_token %}
+            
+            <label style="color: var(--color-text); display: block; margin-bottom: 8px;">نام کاربری</label>
+            <input type="text" name="username" style="width: 100%; padding: 12px; margin-bottom: 20px; border-radius: 10px; border: 1px solid rgba(255,255,255,0.1); background: var(--color-bg); color: white; font-family: 'vazir'; outline: none;" required>
+
+            <label style="color: var(--color-text); display: block; margin-bottom: 8px;">رمز عبور</label>
+            <input type="password" name="password" style="width: 100%; padding: 12px; margin-bottom: 25px; border-radius: 10px; border: 1px solid rgba(255,255,255,0.1); background: var(--color-bg); color: white; font-family: 'vazir'; outline: none;" required>
+
+            <button type="submit" style="width: 100%; padding: 14px; background: var(--color-primary); color: #1A1C1F; border: none; border-radius: 10px; font-family: 'vazir'; font-weight: bold; font-size: 16px; cursor: pointer; transition: 0.3s;">ورود به سیستم</button>
+        </form>
+
+        <div style="text-align: center; margin-top: 20px; font-size: 13px;">
+            <span style="color: var(--color-text-muted);">حساب کاربری ندارید؟</span>
+            <a href="{% url 'register' %}" style="color: var(--color-secondary); text-decoration: none;">ثبت‌نام کنید</a>
+        </div>
+
+    </div>
+</div>
+{% endblock %}

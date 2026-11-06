@@ -1,0 +1,275 @@
+{% extends 'base.html' %}
+{% load humanize %}
+{% load custom_filters %}
+{% load jformat %}
+{% load static %}
+
+    {% block title %} فاکتورها | دارا{% endblock %}
+
+{% block extra_css %}
+   
+{% endblock %}
+
+{% block content %}
+
+    <main class="invoice-page">
+
+        <!-- Header -->
+
+        <section class="page-header">
+
+            <div>
+
+                <span class="page-label">
+                    مدیریت مالی
+                </span>
+
+                <h1>
+                    فاکتورها
+                </h1>
+
+                <p>
+                    صدور، مدیریت و پیگیری فاکتورهای مالی
+                </p>
+
+            </div>
+
+            <button class="add-invoice-btn" id="openInvoiceModal">
+                <span>+</span>
+                ایجاد فاکتور
+            </button>
+
+        </section>
+
+
+        <!-- Summary Cards -->
+
+        <section class="invoice-summary-grid">
+
+            <div class="invoice-summary-card yellow-card">
+
+                <span class="summary-icon">🧾</span>
+
+                <div>
+
+                    <span class="summary-title">
+                        کل فاکتورها
+                    </span>
+
+                    <strong>
+                        {{ total_count|to_persian }}
+                    </strong>
+
+                </div>
+
+            </div>
+
+
+            <div class="invoice-summary-card green-card">
+
+                <span class="summary-icon">✓</span>
+
+                <div>
+
+                    <span class="summary-title">
+                        پرداخت‌شده
+                    </span>
+
+                    <strong>
+                        {{ paid_count|to_persian }}
+                    </strong>
+
+                </div>
+
+            </div>
+
+
+            <div class="invoice-summary-card blue-card">
+
+                <span class="summary-icon">◷</span>
+
+                <div>
+
+                    <span class="summary-title">
+                        پرداخت‌نشده
+                    </span>
+
+                    <strong>
+                        {{ unpaid_count|to_persian }}
+                    </strong>
+
+                </div>
+
+            </div>
+
+
+            <div class="invoice-summary-card pink-card">
+
+                <span class="summary-icon">!</span>
+
+                <div>
+
+                    <span class="summary-title">
+                        معوق
+                    </span>
+
+                    <strong>
+                        {{ overdue_count|to_persian }}
+                    </strong>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- Filters -->
+        <form method="GET" action="{% url 'invoices' %}" class="invoice-filter-box">
+            <div class="invoice-search">
+                <span>⌕</span>
+                <input type="text" name="q" value="{{ query }}" placeholder="جستجوی فاکتور یا مشتری...">
+            </div>
+
+            <select name="status">
+                <option value="all">همه وضعیت‌ها</option>
+                <option value="0" {% if selected_status == '0' %}selected{% endif %}>پرداخت‌شده</option>
+                <option value="1" {% if selected_status == '1' %}selected{% endif %}>پرداخت‌نشده</option>
+                <option value="2" {% if selected_status == '2' %}selected{% endif %}>معوق</option>
+            </select>
+
+            <button type="submit" style="background: var(--color-primary); color: #1A1C1F; border: none; padding: 0 20px; border-radius: 10px; cursor: pointer; font-family: 'vazir';">فیلتر</button>
+        </form>
+
+        <!-- Invoice Table -->
+
+        <section class="invoice-table-card">
+
+            <div class="section-title">
+
+                <div>
+
+                    <h2>
+                        لیست فاکتورها
+                    </h2>
+
+                    <span>
+                        آخرین فاکتورهای ثبت شده
+                    </span>
+
+                </div>
+
+            </div>
+
+
+            <div class="table-wrapper">
+
+                <table>
+
+                    <thead>
+
+                        <tr>
+
+                            <th>شماره</th>
+                            <th>مشتری</th>
+                            <th>تاریخ</th>
+                            <th>مبلغ</th>
+                            <th>وضعیت</th>
+                            <th>عملیات</th>
+
+                        </tr>
+
+                    </thead>
+
+
+                    <tbody id="invoiceTable">
+                        {% for invoice in invoices %}
+                        <tr>
+                            <td>#{{ invoice.invoice_number }}</td>
+                            <td>{{ invoice.customer_name }}</td>
+                            <td>{{ invoice.created_at|jformat:"%Y/%m/%d" }}</td>
+                            <td>{{ invoice.amount|intcomma|to_persian }} تومان</td>
+                            <td>
+                                {% if invoice.status == '0' %}
+                                    <span class="invoice-status paid">پرداخت‌شده</span>
+                                {% elif invoice.status == '1' %}
+                                    <span class="invoice-status unpaid">پرداخت‌نشده</span>
+                                {% else %}
+                                    <span class="invoice-status overdue">معوق</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <!-- لینک دادن دکمه مشاهده به صفحه جزئیات -->
+                                <a href="{% url 'invoice_detail' invoice.pk %}" class="view-invoice" style="text-decoration: none;">مشاهده</a>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="6" style="text-align: center;">هیچ فاکتوری یافت نشد.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+
+                </table>
+
+            </div>
+
+        </section>
+
+    </main>
+
+
+    <!-- Create Invoice Modal -->
+
+    <div class="invoice-modal" id="invoiceModal">
+
+        <div class="invoice-modal-box">
+
+            <button
+                class="modal-close"
+                id="closeInvoiceModal"
+            >
+                ×
+            </button>
+
+
+            <h2>
+                ایجاد فاکتور
+            </h2>
+
+            <p>
+                اطلاعات فاکتور جدید را وارد کنید.
+            </p>
+
+
+            <form id="invoiceForm" method="POST" action="{% url 'invoices' %}">
+                {% csrf_token %}
+
+                <label>نام مشتری</label>
+                <input type="text" name="customer_name" placeholder="نام مشتری" required>
+
+                <label>شماره فاکتور</label>
+                <input type="text" name="invoice_number" placeholder="مثلاً 1006" required>
+
+                <label>مبلغ</label>
+                <input type="number" name="amount" placeholder="مبلغ به تومان" required>
+
+                <label>وضعیت</label>
+                <select name="status">
+                    <option value="0">پرداخت‌شده</option>
+                    <option value="1">پرداخت‌نشده</option>
+                    <option value="2">معوق</option>
+                </select>
+
+                <button type="submit" class="invoice-submit">ایجاد فاکتور</button>
+            </form>
+
+        </div>
+
+    </div>
+
+{% endblock %}
+
+{% block extra_js %} 
+    <script src="{% static 'js/invoice.js' %}"></script>
+{% endblock %}

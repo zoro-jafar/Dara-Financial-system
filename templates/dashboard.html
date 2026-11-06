@@ -1,0 +1,121 @@
+{% extends 'base.html' %}
+{% load humanize %}
+{% load custom_filters %}
+{% load static %}
+
+{% block title %}داشبورد | دارا{% endblock %}
+
+{% block content %}
+<div class="tab">
+    <header>
+        <h2 class="tab_lot">
+            خوش آمدی <span id="userName">{{ request.user.first_name|default:request.user.username }}</span> 👋
+        </h2>
+        <span class="date" id="date"></span>
+    </header>
+
+    <main>
+        <div class="Grid">
+            <div class="box-s">
+                <span><strong style="font-size: 19px; color: #9Da3aa;"> درآمد این ماه</strong></span>
+                <span class="title-line1"></span>
+                <span>{{ total_income|intcomma|to_persian }} <span> تومان </span></span>
+                <span><span style="color: #16b8d4;"><strong style="font-weight: 900; font-size: 20px;">↑</strong></span> ۸.۵٪</span>
+            </div>
+
+            <div class="box-s">
+                <span><strong style="font-size: 19px;">هزینه این ماه</strong></span>
+                <span class="title-line2"></span>
+                <span>{{ total_expense|intcomma|to_persian }} <span style="color: #F4F5F6;"> تومان </span></span>
+                <span style="color: #F4F5F6;"><span style="color: #FF6B6B;"><strong style="font-weight: 900; font-size: 20px;">↓</strong></span> ۴.۲٪</span>
+            </div>
+
+            <div class="box-s">
+                <span><strong style="font-size: 19px;">سود خالص</strong></span>
+                <span class="title-line3"></span>
+                <span>{{ net_profit|intcomma|to_persian }} <span style="color: #F4F5F6;"> تومان </span></span>
+                <span style="color: #F4F5F6;"><span style="color: #16B8D4;"><strong style="font-weight: 900; font-size: 20px;">↑</strong></span> ۱۲.۳٪</span>
+            </div>
+
+            <div class="box-s">
+                <span><strong style="font-size: 19px;">موجودی نقد و بانک</strong></span>
+                <span class="title-line4"></span>
+                <span>{{ cash_balance|intcomma|to_persian }}<span style="color: #F4F5F6;"> تومان </span></span>
+                <span style="color: #F4F5F6;">امروز</span>
+            </div>
+        </div>
+
+        <div class="charts">
+            <div class="chart-box">
+                <h3>مقایسه هزینه‌ها</h3>
+                <canvas id="expenseBar"></canvas>
+            </div>
+            <div class="chart-box">
+                <h3>روند درآمد</h3>
+                <canvas id="incomeLine"></canvas>
+            </div>
+        </div>
+
+        <section class="transactions">
+            <div class="transactions-header">
+                <h3>آخرین تراکنش‌ها</h3>
+                <span>مشاهده همه</span>
+            </div>
+
+            <div class="table-container">
+               <tbody>
+                    {% for transaction in recent_transactions %}
+                    <tr>
+                        <!-- تاریخ شمسی -->
+                        <td>{{ transaction.created_at|jformat:"%Y/%m/%d" }}</td>
+                        
+                        <!-- شرح تراکنش -->
+                        <td>{{ transaction.description|default:"بدون شرح" }}</td>
+                        
+                        <!-- نوع (درآمد/هزینه) -->
+                        <td class="{% if transaction.transaction_type == '0' %}expense{% else %}income{% endif %}">
+                            {{ transaction.get_transaction_type_display }}
+                        </td>
+                        
+                        <!-- مبلغ -->
+                        <td>{{ transaction.amount|intcomma|to_persian }} تومان</td>
+                        
+                        <!-- وضعیت -->
+                        <td><span class="status">ثبت شده</span></td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="5" style="text-align: center; color: gray;">تراکنشی ثبت نشده است.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </div>
+        </section>
+    </main>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+    <script>
+        // ۱. این بخش تاریخ بالای صفحه رو شمسی می‌کنه
+        const dateElement = document.getElementById('date');
+        if(dateElement) {
+            const today = new Date();
+            dateElement.textContent = new Intl.DateTimeFormat('fa-IR-u-ca-persian', {
+                weekday: 'long', day: 'numeric', month: 'long', year: 'numeric'
+            }).format(today);
+        }
+    </script>
+
+    <!-- ۲. این بخش کتابخانه و داده‌های نمودار است -->
+    <script src="{% static 'js/chart.min.js' %}"></script>
+    <script>
+        const expenseLabels = {{ expense_labels|safe }};
+        const expenseValues = {{ expense_values|safe }};
+        
+        const incomeLabels = {{ income_labels|safe }};
+        const incomeValues = {{ income_values|safe }};
+    </script>
+    
+    <script src="{% static 'js/dashboard.js' %}"></script>
+{% endblock %}

@@ -1,0 +1,353 @@
+{% extends 'base.html' %}
+{% load humanize %}
+{% load custom_filters %}
+{% load jformat %}
+{% load static %}
+
+
+{% block title %}سرمایه‌گذاری | دارا{% endblock %}
+
+{% block extra_css %}
+   
+{% endblock %}
+
+{% block content %}
+
+    
+<main class="investment-page">
+
+    <!-- Header -->
+
+    <section class="page-header">
+
+        <div>
+
+            <span class="page-label">
+                مدیریت سرمایه
+            </span>
+
+            <h1>
+                سرمایه‌گذاری
+            </h1>
+
+            <p>
+                مدیریت و پیگیری سرمایه‌گذاری‌های شما
+            </p>
+
+        </div>
+
+        <button class="add-investment-btn" id="openInvestmentModal">
+            <span>+</span>
+            ثبت سرمایه‌گذاری
+        </button>
+
+    </section>
+
+
+    <!-- Summary Cards -->
+
+    <section class="investment-summary-grid">
+
+        <div class="investment-summary-card">
+
+            <span class="investment-icon">💰</span>
+
+            <div>
+                <span class="summary-title">
+                    ارزش کل سرمایه‌گذاری
+                </span>
+
+                <strong>
+                    {{ total_value|intcomma|to_persian }}
+                </strong>
+
+                <small>
+                    تومان
+                </small>
+            </div>
+
+        </div>
+
+
+        <div class="investment-summary-card">
+
+            <span class="investment-icon">↗</span>
+
+            <div>
+                <span class="summary-title">
+                    سود / زیان
+                </span>
+
+                <strong class="profit-value">
+                    {{ total_profit|intcomma|to_persian }}
+                </strong>
+
+                <small>
+                    تومان
+                </small>
+            </div>
+
+        </div>
+
+
+        <div class="investment-summary-card">
+
+            <span class="investment-icon">▦</span>
+
+            <div>
+                <span class="summary-title">
+                    تعداد سرمایه‌گذاری‌ها
+                </span>
+
+                <strong>
+                    ۸
+                </strong>
+
+                <small>
+                    مورد فعال
+                </small>
+            </div>
+
+        </div>
+
+
+        <div class="investment-summary-card">
+
+            <span class="investment-icon">%</span>
+
+            <div>
+                <span class="summary-title">
+                    بازدهی کل
+                </span>
+
+                <strong class="profit-value">
+                    ۷.۶٪
+                </strong>
+
+                <small>
+                    نسبت به سرمایه اولیه
+                </small>
+            </div>
+
+        </div>
+
+    </section>
+
+
+
+    <!-- Filters -->
+    <form method="GET" action="{% url 'investments' %}" class="investment-filter-box">
+        <div class="investment-search">
+            <span>⌕</span>
+            <input type="text" name="q" value="{{ query }}" placeholder="جستجوی سرمایه‌گذاری...">
+        </div>
+
+        <select name="type">
+            <option value="all">همه انواع</option>
+            <option value="0" {% if selected_type == '0' %}selected{% endif %}>سهام</option>
+            <option value="1" {% if selected_type == '1' %}selected{% endif %}>صندوق</option>
+            <option value="2" {% if selected_type == '2' %}selected{% endif %}>طلا</option>
+        </select>
+
+        <button type="submit" style="background: var(--color-primary); color: #1A1C1F; border: none; padding: 0 20px; border-radius: 10px; cursor: pointer; font-family: 'vazir';">فیلتر</button>
+    </form>
+
+    <!-- Investment Table -->
+
+    <section class="investment-table-card">
+
+        <div class="section-title">
+
+            <div>
+
+                <h2>
+                    سرمایه‌گذاری‌های من
+                </h2>
+
+                <span>
+                    دارایی‌ها و وضعیت سرمایه‌گذاری‌های ثبت‌شده
+                </span>
+
+            </div>
+
+        </div>
+
+
+        <div class="investment-table-wrapper">
+
+            <table>
+
+                <thead>
+
+                    <tr>
+                        <th>دارایی</th>
+                        <th>نوع</th>
+                        <th>مبلغ سرمایه‌گذاری</th>
+                        <th>سود / زیان</th>
+                        <th>وضعیت</th>
+                        <th>عملیات</th>
+                    </tr>
+
+                </thead>
+
+
+                <tbody id="investmentTable">
+                    {% for inv in investments %}
+                    <tr>
+                        <td>{{ inv.name }}</td>
+                        <td>
+                            <!-- نمایش نوع سرمایه‌گذاری با رنگ مربوطه -->
+                            <span class="investment-type {% if inv.type == '0' %}stock{% elif inv.type == '1' %}fund{% else %}gold{% endif %}">
+                                {{ inv.get_type_display }}
+                            </span>
+                        </td>
+                        <td>{{ inv.amount|intcomma|to_persian }} تومان</td>
+                        <td class="{% if inv.profit_loss >= 0 %}profit-text{% else %}loss-text{% endif %}">
+                            {% if inv.profit_loss >= 0 %}+{% endif %}{{ inv.profit_loss|intcomma|to_persian }} تومان
+                        </td>
+                        <td>
+                            <span class="investment-status active">{{ inv.get_status_display }}</span>
+                        </td>
+                        <td>
+                            <button class="investment-view">مشاهده</button>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="6" style="text-align: center; color: gray;">هیچ سرمایه‌گذاری ثبت نشده است.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+
+            </table>
+
+        </div>
+
+    </section>
+
+
+    <!-- Educational Section -->
+
+    <section class="investment-learning">
+
+        <div class="learning-content">
+
+            <span class="learning-label">
+                آشنایی با بازار سرمایه
+            </span>
+
+            <h2>
+                قبل از سرمایه‌گذاری، بیشتر بدانید
+            </h2>
+
+            <p>
+                با مفاهیم پایه بازار سرمایه، ریسک و بازده
+                و اهمیت تنوع‌بخشی آشنا شوید.
+            </p>
+
+        </div>
+
+
+        <div class="learning-cards">
+
+            <div class="learning-card">
+
+                <span>📊</span>
+
+                <h3>
+                    بورس چیست؟
+                </h3>
+
+                <p>
+                    آشنایی با مفهوم بازار سرمایه
+                </p>
+
+            </div>
+
+
+            <div class="learning-card">
+
+                <span>⚖</span>
+
+                <h3>
+                    ریسک و بازده
+                </h3>
+
+                <p>
+                    شناخت رابطه ریسک و سود
+                </p>
+
+            </div>
+
+
+            <div class="learning-card">
+
+                <span>◈</span>
+
+                <h3>
+                    تنوع‌بخشی
+                </h3>
+
+                <p>
+                    تقسیم سرمایه بین دارایی‌های مختلف
+                </p>
+
+            </div>
+
+        </div>
+
+    </section>
+
+</main>
+
+
+    <!-- Investment Modal -->
+
+    <div class="investment-modal" id="investmentModal">
+
+        <div class="investment-modal-box">
+
+            <button
+                class="modal-close"
+                id="closeInvestmentModal"
+            >
+                ×
+            </button>
+
+
+            <h2>
+                ثبت سرمایه‌گذاری
+            </h2>
+
+            <p>
+                اطلاعات سرمایه‌گذاری جدید را وارد کنید.
+            </p>
+
+
+            <form id="investmentForm" method="POST" action="{% url 'investments' %}">
+                {% csrf_token %}
+                <label>نام دارایی</label>
+                <input type="text" name="name" placeholder="مثلاً سهام فولاد" required>
+                
+                <label>نوع سرمایه‌گذاری</label>
+                <select name="type">
+                    <option value="0">سهام</option>
+                    <option value="1">صندوق</option>
+                    <option value="2">طلا</option>
+                </select>
+                
+                <label>مبلغ</label>
+                <input type="number" name="amount" placeholder="مبلغ به تومان" required>
+                
+                <button type="submit" class="investment-submit">ثبت</button>
+            </form>
+
+        </div>
+
+    </div>
+{% endblock %}
+
+    
+{% block extra_js %}
+    <script src="{% static 'js/investment.js' %}"></script>
+{% endblock %}

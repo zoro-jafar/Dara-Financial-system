@@ -1,0 +1,20 @@
+{% extends 'base.html' %}
+{% load humanize %}
+{% load custom_filters %}
+{% load jformat %}
+{% block title %}جزئیات فاکتور{% endblock %}
+
+{% block content %}
+<div style="padding: 50px; max-width: 800px; margin: 0 auto;">
+    <h1 style="color: var(--color-primary); margin-bottom: 30px;">جزئیات فاکتور #{{ invoice.invoice_number }}</h1>
+    
+    <div style="background: var(--color-surface); padding: 30px; border-radius: 15px; color: white;">
+        <p style="margin-bottom: 15px;"><strong>مشتری:</strong> {{ invoice.customer_name }}</p>
+        <p style="margin-bottom: 15px;"><strong>مبلغ کل:</strong> {{ invoice.amount|intcomma|to_persian }} تومان</p>
+        <p style="margin-bottom: 15px;"><strong>تاریخ:</strong> {{ invoice.created_at|jformat:"%Y/%m/%d" }}</p>
+        <p style="margin-bottom: 15px;"><strong>وضعیت:</strong> {{ invoice.get_status_display }}</p>
+    </div>
+    
+    <a href="{% url 'invoices' %}" style="display: inline-block; margin-top: 20px; color: var(--color-secondary); text-decoration: none;">← بازگشت به لیست فاکتورها</a>
+</div>
+{% endblock %}

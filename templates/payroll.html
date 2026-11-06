@@ -1,0 +1,456 @@
+{% extends 'base.html' %}
+{% load humanize %}
+{% load custom_filters %}
+{% load static %}
+
+    {% block title %}حقوق و دستمزد | دارا{% endblock %}
+
+    
+{% block extra_css %}
+   
+{% endblock %}
+
+{% block content %}
+    <main class="payroll-page">
+
+        <!-- =============================
+                Header
+        ============================== -->
+
+        <section class="page-header">
+
+            <div>
+
+                <span class="page-label">
+                    مدیریت کارکنان
+                </span>
+
+                <h1>
+                    حقوق و دستمزد
+                </h1>
+
+                <p>
+                    مدیریت اطلاعات کارکنان و پرداخت حقوق
+                </p>
+
+            </div>
+
+
+            <button
+                class="add-payroll-btn"
+                id="openPayrollModal"
+            >
+
+                <span>+</span>
+                ثبت حقوق
+
+            </button>
+
+        </section>
+
+
+        <!-- =============================
+                Summary Cards
+        ============================== -->
+
+        <section class="payroll-summary-grid">
+
+
+            <div class="payroll-summary-card">
+
+                <span class="payroll-icon">
+                    👥
+                </span>
+
+                <div>
+
+                    <span class="summary-title">
+                        تعداد کارکنان
+                    </span>
+
+                    <strong>
+                        {{ employee_count|to_persian }}
+                    </strong>
+
+                    <small>
+                        نفر
+                    </small>
+
+                </div>
+
+            </div>
+
+
+            <div class="payroll-summary-card">
+
+                <span class="payroll-icon">
+                    💰
+                </span>
+
+                <div>
+
+                    <span class="summary-title">
+                        مجموع حقوق
+                    </span>
+
+                    <strong>
+                        {{ total_salary|intcomma|to_persian }}
+                    </strong>
+
+                    <small>
+                        تومان
+                    </small>
+
+                </div>
+
+            </div>
+
+
+            <div class="payroll-summary-card">
+
+                <span class="payroll-icon">
+                    ✓
+                </span>
+
+                <div>
+
+                    <span class="summary-title">
+                        پرداخت‌شده
+                    </span>
+
+                    <strong class="payroll-paid">
+                        {{ paid_salary|intcomma|to_persian }}
+                    </strong>
+
+                    <small>
+                        تومان
+                    </small>
+
+                </div>
+
+            </div>
+
+
+            <div class="payroll-summary-card">
+
+                <span class="payroll-icon">
+                    ◷
+                </span>
+
+                <div>
+
+                    <span class="summary-title">
+                        در انتظار پرداخت
+                    </span>
+
+                    <strong class="payroll-pending">
+                        {{ pending_salary|intcomma|to_persian }}
+                    </strong>
+
+                    <small>
+                        تومان
+                    </small>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- =============================
+                Monthly Payment Status
+        ============================== -->
+
+        <section class="payroll-progress-card">
+
+            <div class="payroll-progress-info">
+
+                <div>
+
+                    <span class="progress-label">
+                        وضعیت پرداخت حقوق
+                    </span>
+
+                    <h2>
+                        حقوق مرداد ۱۴۰۵
+                    </h2>
+
+                </div>
+
+                <strong>
+                    ۸۵٪
+                </strong>
+
+            </div>
+
+
+            <div class="progress-bar">
+
+                <div class="progress-value"></div>
+
+            </div>
+
+
+            <div class="progress-details">
+
+                <span>
+                    ۱۰ نفر پرداخت شده
+                </span>
+
+                <span>
+                    ۲ نفر در انتظار پرداخت
+                </span>
+
+            </div>
+
+        </section>
+
+
+        <!-- =============================
+                Filters
+        ============================== -->
+
+        <!-- Filters -->
+        <form method="GET" action="{% url 'payrolls' %}" class="payroll-filter-box">
+            <div class="payroll-search">
+                <span>⌕</span>
+                <input type="text" name="q" value="{{ query }}" placeholder="جستجوی نام کارمند...">
+            </div>
+
+            <select name="status">
+                <option value="all">همه وضعیت‌ها</option>
+                <option value="0" {% if selected_status == '0' %}selected{% endif %}>پرداخت‌شده</option>
+                <option value="1" {% if selected_status == '1' %}selected{% endif %}>در انتظار پرداخت</option>
+            </select>
+
+            <button type="submit" style="background: var(--color-primary); color: #1A1C1F; border: none; padding: 0 20px; border-radius: 10px; cursor: pointer; font-family: 'vazir';">فیلتر</button>
+        </form>
+
+
+        <!-- =============================
+                Employees Table
+        ============================== -->
+
+        <section class="payroll-table-card">
+
+            <div class="section-title">
+
+                <div>
+
+                    <h2>
+                        لیست کارکنان
+                    </h2>
+
+                    <span>
+                        اطلاعات حقوق و وضعیت پرداخت کارکنان
+                    </span>
+
+                </div>
+
+            </div>
+
+
+            <div class="payroll-table-wrapper">
+
+                <table>
+
+                    <thead>
+
+                        <tr>
+
+                            <th>کارمند</th>
+                            <th>سمت</th>
+                            <th>حقوق پایه</th>
+                            <th>مزایا</th>
+                            <th>کسورات</th>
+                            <th>حقوق نهایی</th>
+                            <th>وضعیت</th>
+
+                        </tr>
+
+                    </thead>
+
+
+                    <tbody id="payrollTable">
+                        {% for p in payrolls %}
+                        <tr>
+                            <td>{{ p.employee_name }}</td>
+                            <td>{{ p.position }}</td>
+                            <td>{{ p.base_salary|intcomma|to_persian }}</td>
+                            <td>{{ p.benefits|intcomma|to_persian }}</td>
+                            <td>{{ p.deductions|intcomma|to_persian }}</td>
+                            <td>{{ p.final_salary|intcomma|to_persian }} تومان</td>
+                            <td>
+                                {% if p.status == '0' %}
+                                    <span class="payroll-status paid">پرداخت‌شده</span>
+                                {% else %}
+                                    <span class="payroll-status pending">در انتظار پرداخت</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+        </section>
+
+
+        <!-- =============================
+                Salary Calculator
+        ============================== -->
+
+        <section class="salary-calculator">
+
+            <div class="calculator-content">
+
+                <span class="calculator-label">
+                    محاسبه حقوق
+                </span>
+
+                <h2>
+                    حقوق نهایی کارکنان را محاسبه کنید
+                </h2>
+
+                <p>
+                    حقوق پایه و مزایا را وارد کنید و کسورات را
+                    از آن کم کنید تا مبلغ نهایی محاسبه شود.
+                </p>
+
+            </div>
+
+
+            <div class="calculator-box">
+
+                <div>
+
+                    <label>
+                        حقوق پایه
+                    </label>
+
+                    <input
+                        type="number"
+                        id="baseSalary"
+                        placeholder="مثلاً 15000000"
+                    >
+
+                </div>
+
+
+                <div>
+
+                    <label>
+                        مزایا
+                    </label>
+
+                    <input
+                        type="number"
+                        id="benefits"
+                        placeholder="مثلاً 2000000"
+                    >
+
+                </div>
+
+
+                <div>
+
+                    <label>
+                        کسورات
+                    </label>
+
+                    <input
+                        type="number"id="deductions"
+                        placeholder="مثلاً 500000"
+                    >
+
+                </div>
+
+
+                <div class="salary-result">
+
+                    <span>
+                        حقوق نهایی
+                    </span>
+
+                    <strong id="salaryResult">
+                        ۰ تومان
+                    </strong>
+
+                </div>
+
+
+                <button
+                    id="calculateSalary"
+                    class="calculate-btn"
+                >
+                    محاسبه حقوق
+                </button>
+
+            </div>
+
+        </section>
+
+    </main>
+
+
+    <!-- =============================
+            Payroll Modal
+    ============================== -->
+
+    <div
+        class="payroll-modal"
+        id="payrollModal"
+    >
+
+        <div class="payroll-modal-box">
+
+            <button
+                class="modal-close"
+                id="closePayrollModal"
+            >
+                ×
+            </button>
+
+
+            <h2>
+                ثبت حقوق
+            </h2>
+
+            <p>
+                اطلاعات حقوق کارمند را وارد کنید.
+            </p>
+
+
+            <form id="payrollForm" method="POST" action="{% url 'payrolls' %}">
+                {% csrf_token %}
+                <label>نام کارمند</label>
+                <input type="text" name="employee_name" placeholder="نام و نام خانوادگی" required>
+
+                <label>سمت</label>
+                <input type="text" name="position" placeholder="مثلاً حسابدار" required>
+
+                <label>حقوق پایه</label>
+                <input type="number" name="base_salary" placeholder="مبلغ به تومان" required>
+
+                <label>وضعیت پرداخت</label>
+                <select name="status">
+                    <option value="0">پرداخت‌شده</option>
+                    <option value="1">در انتظار پرداخت</option>
+                </select>
+
+                <button type="submit" class="payroll-submit">ثبت حقوق</button>
+            </form>
+
+        </div>
+
+    </div>
+{% endblock %}
+
+{% block extra_js %}
+    <script src="{% static 'js/payroll.js' %}"></script>
+{% endblock %}
+
